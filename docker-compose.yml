@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: scada-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - scada-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: scada-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/scada_db
+      - JWT_SECRET=super_secret_key_change_in_production
+    depends_on:
+      - mongodb
+    networks:
+      - scada-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: scada-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - scada-network
+
+networks:
+  scada-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

@@ -1,0 +1,57 @@
+name: SCADA Monitoring CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Backend Lint
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Backend Tests
+        run: |
+          cd backend
+          npm test
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Frontend Build
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Docker Build Check
+        run: |
+          docker build -t scada-backend ./backend
+          docker build -t scada-frontend ./frontend
+          docker build -t scada-simulator ./simulator
