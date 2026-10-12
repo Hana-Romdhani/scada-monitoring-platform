@@ -45,7 +45,7 @@ coverage/
 # SCADA specific (if any local data dumps)
 *.dump
 *.sql
-idea.txt
+*.txt
 
 .env
 .env.*
